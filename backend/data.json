@@ -1,0 +1,179 @@
+{
+  "profile": {
+    "username": "developer_shivam2106",
+    "full_name": "SHIVAM KUMAR YADAV",
+    "bio": "Location: 📍Noida",
+    "website": "www.linkedin.com/in/shivam-yadav2106",
+    "avatar_url": "http://localhost:5000/uploads/avatar/profile.png",
+    "projects_count": 5,
+    "followers_count": 150,
+    "following_count": 50
+  },
+  "skills": [
+    { "name": "React", "icon": "FaBeer", "order_index": 1 },
+    { "name": "Node.js", "icon": "Cpu", "order_index": 2 },
+    { "name": "MongoDB", "icon": "Database", "order_index": 3 },
+    { "name": "TypeScript", "icon": "Code2", "order_index": 4 },
+    { "name": "Tailwind CSS", "icon": "Palette", "order_index": 5 },
+    { "name": "Express", "icon": "Zap", "order_index": 6 }
+  ],
+  "projects": [
+    {
+      "title": "Portfolio Website",
+      "description": "A modern portfolio website built with React and Tailwind CSS",
+      "image_urls": [
+        "http://localhost:5000/uploads/projects/project1.png",
+        "http://localhost:5000/uploads/projects/project1-2.png",
+        "http://localhost:5000/uploads/projects/project1-3.png",
+        "http://localhost:5000/uploads/projects/project1-4.png"
+      ],
+      "project_url": "https://github.com/user/portfolio",
+      "technologies": ["React", "Tailwind CSS", "Vite"],
+      "order_index": 1
+    },
+    {
+      "title": "E-Commerce Platform",
+      "description": "Full-stack e-commerce platform with payment integration",
+      "image_urls": [
+        "http://localhost:5000/uploads/projects/project2.png",
+        "http://localhost:5000/uploads/projects/project2-2.png",
+        "http://localhost:5000/uploads/projects/project2-3.png"
+      ],
+      "project_url": "https://github.com/user/ecommerce",
+      "technologies": ["React", "Node.js", "MongoDB", "Stripe"],
+      "order_index": 2
+    },
+    {
+      "title": "Task Management App",
+      "description": "Collaborative task management application with real-time updates",
+      "image_urls": [
+        "http://localhost:5000/uploads/projects/project3.png",
+        "http://localhost:5000/uploads/projects/project3-2.png",
+        "http://localhost:5000/uploads/projects/project3-3.png"
+      ],
+      "project_url": "https://github.com/user/taskapp",
+      "technologies": ["React", "Firebase", "Material UI"],
+      "order_index": 3
+    },
+    {
+      "title": "Blog CMS",
+      "description": "Content management system for creating and managing blog posts",
+      "image_urls": [
+        "http://localhost:5000/uploads/projects/project4.png",
+        "http://localhost:5000/uploads/projects/project4-2.png",
+        "http://localhost:5000/uploads/projects/project4-3.png"
+      ],
+      "project_url": "https://github.com/user/blogcms",
+      "technologies": ["Next.js", "MongoDB", "Node.js"],
+      "order_index": 4
+    },
+    {
+      "title": "Weather Dashboard",
+      "description": "Real-time weather dashboard with beautiful UI and forecasts",
+      "image_urls": [
+        "http://localhost:5000/uploads/projects/project5.png",
+        "http://localhost:5000/uploads/projects/project5-2.png",
+        "http://localhost:5000/uploads/projects/project5-3.png"
+      ],
+      "project_url": "https://github.com/user/weather",
+      "technologies": ["React", "OpenWeather API", "Tailwind CSS"],
+      "order_index": 5
+    }
+  ],
+  "experiments": [
+    {
+      "title": "AI Chat Bot",
+      "description": "Experimental AI chatbot using GPT-3 API and React",
+      "image_urls": [
+        "http://localhost:5000/uploads/experiments/exp1.png",
+        "http://localhost:5000/uploads/experiments/exp1-2.png"
+      ],
+      "project_url": "https://github.com/user/ai-chatbot",
+      "technologies": ["React", "OpenAI API", "Node.js"],
+      "order_index": 1
+    },
+    {
+      "title": "3D Web Experience",
+      "description": "Interactive 3D visualization using Three.js and WebGL",
+      "image_urls": [
+        "http://localhost:5000/uploads/experiments/exp2.png",
+        "http://localhost:5000/uploads/experiments/exp2-2.png"
+      ],
+      "project_url": "https://github.com/user/3d-web",
+      "technologies": ["Three.js", "WebGL", "JavaScript"],
+      "order_index": 2
+    }
+  ],
+  "hackathons": [
+    {
+      "title": "Climate Tech Hackathon Winner",
+      "description": "Built a sustainable carbon tracking app - Won 1st prize",
+      "image_urls": [
+        "http://localhost:5000/uploads/hackathons/hack1.png",
+        "http://localhost:5000/uploads/hackathons/hack1-2.png"
+      ],
+      "project_url": "https://github.com/user/carbon-tracker",
+      "technologies": ["React", "MongoDB", "Mapbox API"],
+      "order_index": 1
+    },
+    {
+      "title": "Healthcare Innovation Hackathon",
+      "description": "Developed a telemedicine platform for rural areas",
+      "image_urls": [
+        "http://localhost:5000/uploads/hackathons/hack2.png",
+        "http://localhost:5000/uploads/hackathons/hack2-2.png"
+      ],
+      "project_url": "https://github.com/user/telemedicine",
+      "technologies": ["React Native", "Node.js", "PostgreSQL"],
+      "order_index": 2
+    }
+  ],
+  "side_ideas": [
+    {
+      "title": "Productivity Timer",
+      "description": "Simple Pomodoro timer with music and notifications",
+      "image_urls": [
+        "http://localhost:5000/uploads/side_ideas/idea1.png",
+        "http://localhost:5000/uploads/side_ideas/idea1-2.png"
+      ],
+      "project_url": "https://github.com/user/productivity-timer",
+      "technologies": ["React", "Tailwind CSS"],
+      "order_index": 1
+    },
+    {
+      "title": "Daily Quote Generator",
+      "description": "Random quote generator with sharing capabilities",
+      "image_urls": [
+        "http://localhost:5000/uploads/side_ideas/idea2.png",
+        "http://localhost:5000/uploads/side_ideas/idea2-2.png"
+      ],
+      "project_url": "https://github.com/user/quote-generator",
+      "technologies": ["React", "API Integration"],
+      "order_index": 2
+    }
+  ],
+  "iot_works": [
+    {
+      "title": "Smart Home Automation",
+      "description": "IoT system for controlling lights, temperature, and security",
+      "image_urls": [
+        "http://localhost:5000/uploads/iot/iot1.png",
+        "http://localhost:5000/uploads/iot/iot1-2.png"
+      ],
+      "project_url": "https://github.com/user/smart-home",
+      "technologies": ["Arduino", "MQTT", "Python", "Node.js"],
+      "order_index": 1
+    },
+    {
+      "title": "Weather Station Device",
+      "description": "Real-time weather monitoring with IoT sensors and web dashboard",
+      "image_urls": [
+        "http://localhost:5000/uploads/iot/iot2.png",
+        "http://localhost:5000/uploads/iot/iot2-2.png"
+      ],
+      "project_url": "https://github.com/user/weather-station",
+      "technologies": ["Raspberry Pi", "Python", "React", "InfluxDB"],
+      "order_index": 2
+    }
+  ]
+}
