@@ -43,7 +43,7 @@ const profileSchema = new mongoose.Schema({
   website: String,
   avatar_url: String,
   projects_count: { type: Number, default: 0 },
-  followers_count: { type: Number, default: 0 },
+  views_count: { type: Number, default: 0 },
   following_count: { type: Number, default: 0 },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now }
@@ -364,22 +364,30 @@ app.get('/api/profile', async (req, res) => {
     
     // Check if this IP has visited before
     let visitor = await Visitor.findOne({ ip: clientIp });
-    
+
     if (!visitor) {
-      // New visitor - create entry and increment follower count
+      // New visitor - create entry and increment views count
       visitor = new Visitor({ ip: clientIp });
       await visitor.save();
-      
-      // Increment follower count in profile
+
+      // Increment views_count in profile
       let profile = await Profile.findOne();
       if (profile) {
-        profile.followers_count = (profile.followers_count || 0) + 1;
+        // Backfill from legacy followers_count if present
+        if (typeof profile.views_count === 'undefined' && typeof profile.followers_count !== 'undefined') {
+          profile.views_count = profile.followers_count || 0;
+        }
+        profile.views_count = (profile.views_count || 0) + 1;
         await profile.save();
       }
     }
-    
-    // Return profile with current follower count
+
+    // Return profile with current views count (migrate legacy field if necessary)
     const profile = await Profile.findOne();
+    if (profile && typeof profile.views_count === 'undefined' && typeof profile.followers_count !== 'undefined') {
+      profile.views_count = profile.followers_count || 0;
+      await profile.save();
+    }
     res.json(profile || {});
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -414,7 +422,9 @@ app.put('/api/profile', async (req, res) => {
 app.get('/api/followers', async (req, res) => {
   try {
     const profile = await Profile.findOne();
-    res.json({ followers_count: profile?.followers_count || 0 });
+    // prefer views_count, fall back to legacy followers_count
+    const count = profile?.views_count ?? profile?.followers_count ?? 0;
+    res.json({ views_count: count });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

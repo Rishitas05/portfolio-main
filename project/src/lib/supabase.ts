@@ -17,7 +17,7 @@ export interface Profile {
   website: string;
   avatar_url: string;
   projects_count: number;
-  followers_count: number;
+  views_count: number;
   following_count: number;
   created_at: string;
   updated_at: string;

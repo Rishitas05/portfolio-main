@@ -16,6 +16,8 @@ const stringsToRender = [
 export default function ProfileHeader({ profile }: ProfileHeaderProps) {
   if (!profile) return null;
 
+  const viewsCount = (profile as any).views_count ?? (profile as any).followers_count ?? 0;
+
 
   return (
     <div className="flex flex-col items-center md:flex-row md:items-start gap-8 md:gap-16 px-4 py-8">
@@ -43,8 +45,8 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
             <div className="text-gray-600 dark:text-gray-400 text-sm">projects</div>
           </div>
           <div className="text-center">
-            <div className="font-semibold text-black dark:text-white">{profile.followers_count}</div>
-            <div className="text-gray-600 dark:text-gray-400 text-sm">followers</div>
+            <div className="font-semibold text-black dark:text-white">{viewsCount}</div>
+            <div className="text-gray-600 dark:text-gray-400 text-sm">views</div>
           </div>
           <div className="text-center">
             <div className="font-semibold text-black dark:text-white">{profile.following_count}</div>
@@ -62,7 +64,7 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
               href={profile.website}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 flex items-center justify-center md:justify-start gap-1"
+              className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 flex items-center justify-center md:justify-start gap-1 w-fit"
             >
               <Globe size={14} />
               <span>{profile.website.replace(/^https?:\/\//, '')}</span>

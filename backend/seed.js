@@ -22,7 +22,7 @@ const profileSchema = new mongoose.Schema({
   website: String,
   avatar_url: String,
   projects_count: { type: Number, default: 0 },
-  followers_count: { type: Number, default: 0 },
+  views_count: { type: Number, default: 0 },
   following_count: { type: Number, default: 0 },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now }

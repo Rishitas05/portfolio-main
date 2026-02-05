@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Project } from '../lib/mongodb';
-import { X, ChevronLeft, ChevronRight, Heart, MessageCircle, Send, Bookmark, Trash2 } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Heart, MessageCircle, Send, Trash2 } from 'lucide-react';
 
 interface InstagramProjectPostProps {
   project: Project;
@@ -347,11 +347,8 @@ export default function InstagramProjectPost({ project, onClose }: InstagramProj
               <button className="hover:text-gray-600 dark:hover:text-gray-400 transition-colors">
                 <MessageCircle size={24} />
               </button>
-              <button className="hover:text-gray-600 dark:hover:text-gray-400 transition-colors">
+              <button className="hover:text-gray-600 dark:hover:text-gray-400 transition-colors ml-auto">
                 <Send size={24} />
-              </button>
-              <button className="ml-auto hover:text-gray-600 dark:hover:text-gray-400 transition-colors">
-                <Bookmark size={24} />
               </button>
             </div>
 

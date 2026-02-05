@@ -136,7 +136,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
       {/* Side Panel */}
       <div
-        className={`fixed left-0 top-0 h-screen w-full max-w-2xl bg-white dark:bg-black z-50 overflow-hidden flex flex-col transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-700 ease-in-out`}
+        className={`fixed left-0 top-0 h-screen w-full max-w-md bg-white dark:bg-black z-50 overflow-hidden flex flex-col transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-700 ease-in-out`}
         aria-hidden={!isOpen}
       >
         {/* Header - Fixed */}
