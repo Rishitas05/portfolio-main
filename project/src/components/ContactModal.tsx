@@ -16,28 +16,68 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+    setErrorMessage('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage('');
+
+    // Client-side validation
+    if (!formData.name.trim()) {
+      setErrorMessage('Name is required');
+      return;
+    }
+    if (!formData.email.trim()) {
+      setErrorMessage('Email is required');
+      return;
+    }
+    if (!formData.subject.trim()) {
+      setErrorMessage('Subject is required');
+      return;
+    }
+    if (!formData.message.trim()) {
+      setErrorMessage('Message is required');
+      return;
+    }
+
     setIsSubmitting(true);
 
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      const response = await fetch('http://localhost:5000/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-    setIsSubmitting(false);
-    setSubmitStatus('success');
-    setFormData({ name: '', email: '', subject: '', message: '' });
+      const data = await response.json();
 
-    setTimeout(() => {
-      setSubmitStatus('idle');
-      onClose();
-    }, 2000);
+      if (response.ok) {
+        setIsSubmitting(false);
+        setSubmitStatus('success');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+
+        setTimeout(() => {
+          setSubmitStatus('idle');
+        }, 3000);
+      } else {
+        setIsSubmitting(false);
+        setErrorMessage(data.error || 'Failed to send message');
+      }
+    } catch (error) {
+      console.error('Submit error:', error);
+      setIsSubmitting(false);
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to send message');
+    }
   };
 
   const socialLinks = [
@@ -55,20 +95,20 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
       onClick={onClose}
     >
       <div
-        className="bg-black border border-gray-800 rounded-2xl max-w-4xl w-full my-8"
+        className="bg-white dark:bg-black border border-gray-300 dark:border-gray-800 rounded-2xl max-w-4xl w-full my-8"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-800">
+        <div className="flex items-center justify-between p-6 border-b border-gray-300 dark:border-gray-800">
           <div className="flex items-center gap-4">
             <div className="inline-block p-3 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full">
               <Mail size={24} />
             </div>
-            <h1 className="text-2xl font-light">Get In Touch</h1>
+            <h1 className="text-2xl font-light text-black dark:text-white">Get In Touch</h1>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-900 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-900 rounded-lg transition-colors text-black dark:text-white"
           >
             <X size={24} />
           </button>
@@ -79,15 +119,15 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
           {/* Left - Contact Info */}
           <div className="space-y-8">
             <div>
-              <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
+              <h2 className="text-xl font-semibold mb-4 text-black dark:text-white">Contact Information</h2>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-gradient-to-br from-orange-500 to-pink-500 rounded-lg flex-shrink-0">
                     <Mail size={16} />
                   </div>
                   <div>
-                    <div className="text-gray-400 text-sm mb-1">Email</div>
-                    <a href="mailto:contact@example.com" className="hover:text-pink-400 transition-colors">
+                    <div className="text-gray-600 dark:text-gray-400 text-sm mb-1">Email</div>
+                    <a href="mailto:contact@example.com" className="text-black dark:text-white hover:text-pink-600 dark:hover:text-pink-400 transition-colors">
                       contact@example.com
                     </a>
                   </div>
@@ -98,8 +138,8 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                     <Phone size={16} />
                   </div>
                   <div>
-                    <div className="text-gray-400 text-sm mb-1">Phone</div>
-                    <a href="tel:+1234567890" className="hover:text-pink-400 transition-colors">
+                    <div className="text-gray-600 dark:text-gray-400 text-sm mb-1">Phone</div>
+                    <a href="tel:+1234567890" className="text-black dark:text-white hover:text-pink-600 dark:hover:text-pink-400 transition-colors">
                       +91 9205962970
                     </a>
                   </div>
@@ -110,15 +150,15 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                     <MapPin size={16} />
                   </div>
                   <div>
-                    <div className="text-gray-400 text-sm mb-1">Location</div>
-                    <div>San Francisco, CA</div>
+                    <div className="text-gray-600 dark:text-gray-400 text-sm mb-1">Location</div>
+                    <div className="text-black dark:text-white">San Francisco, CA</div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-3">Follow Me</h3>
+              <h3 className="text-lg font-semibold mb-3 text-black dark:text-white">Follow Me</h3>
               <div className="grid grid-cols-2 gap-2">
                 {socialLinks.map((social) => {
                   const Icon = social.icon;
@@ -141,15 +181,15 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
 
           {/* Right - Contact Form */}
           <div>
-            <h2 className="text-xl font-semibold mb-4">Send a Message</h2>
+            <h2 className="text-xl font-semibold mb-4 text-black dark:text-white">Send a Message</h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-400 mb-2">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
                   Your Name
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={16} />
                   <input
                     type="text"
                     id="name"
@@ -157,18 +197,18 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full bg-black border border-gray-700 rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-pink-500 transition-colors"
+                    className="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg py-2 pl-10 pr-4 text-sm text-black dark:text-white focus:outline-none focus:border-pink-500 transition-colors placeholder-gray-400 dark:placeholder-gray-600"
                     placeholder="John Doe"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={16} />
                   <input
                     type="email"
                     id="email"
@@ -176,18 +216,18 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full bg-black border border-gray-700 rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-pink-500 transition-colors"
+                    className="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg py-2 pl-10 pr-4 text-sm text-black dark:text-white focus:outline-none focus:border-pink-500 transition-colors placeholder-gray-400 dark:placeholder-gray-600"
                     placeholder="john@example.com"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-400 mb-2">
+                <label htmlFor="subject" className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
                   Subject
                 </label>
                 <div className="relative">
-                  <MessageSquare className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                  <MessageSquare className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={16} />
                   <input
                     type="text"
                     id="subject"
@@ -195,14 +235,14 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    className="w-full bg-black border border-gray-700 rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-pink-500 transition-colors"
+                    className="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg py-2 pl-10 pr-4 text-sm text-black dark:text-white focus:outline-none focus:border-pink-500 transition-colors placeholder-gray-400 dark:placeholder-gray-600"
                     placeholder="Project Inquiry"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-400 mb-2">
+                <label htmlFor="message" className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
                   Message
                 </label>
                 <textarea
@@ -212,7 +252,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                   onChange={handleChange}
                   required
                   rows={4}
-                  className="w-full bg-black border border-gray-700 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-pink-500 transition-colors resize-none"
+                  className="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg py-2 px-4 text-sm text-black dark:text-white focus:outline-none focus:border-pink-500 transition-colors resize-none placeholder-gray-400 dark:placeholder-gray-600"
                   placeholder="Tell me about your project..."
                 />
               </div>
@@ -235,9 +275,21 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 )}
               </button>
 
+              {errorMessage && (
+                <div className="bg-red-500/10 border border-red-500 rounded-lg p-3 text-center text-red-400 text-sm">
+                  {errorMessage}
+                </div>
+              )}
+
               {submitStatus === 'success' && (
                 <div className="bg-green-500/10 border border-green-500 rounded-lg p-3 text-center text-green-400 text-sm">
                   Message sent successfully! I'll get back to you soon.
+                </div>
+              )}
+
+              {submitStatus === 'error' && (
+                <div className="bg-red-500/10 border border-red-500 rounded-lg p-3 text-center text-red-400 text-sm">
+                  Failed to send message. Please try again or use the email provided.
                 </div>
               )}
             </form>

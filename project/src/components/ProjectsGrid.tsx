@@ -12,17 +12,17 @@ export default function ProjectsGrid({ projects }: ProjectsGridProps) {
 
   return (
     <>
-      <div className="border-t border-gray-800">
-        <div className="flex items-center justify-center gap-2 py-3 border-b border-gray-800">
-          <Grid3x3 size={16} className="text-white" />
-          <span className="text-xs font-semibold tracking-widest">PROJECTS</span>
+      <div className="border-t border-gray-200 dark:border-gray-800">
+        <div className="flex items-center justify-center gap-2 py-3 border-b border-gray-200 dark:border-gray-800">
+          <Grid3x3 size={16} className="text-black dark:text-white" />
+          <span className="text-xs font-semibold tracking-widest text-black dark:text-white">PROJECTS</span>
         </div>
 
         <div className="grid grid-cols-3 gap-1">
           {projects.map((project) => (
             <div
               key={project._id || project.id}
-              className="aspect-square cursor-pointer relative group overflow-hidden bg-gray-900"
+              className="aspect-square cursor-pointer relative group overflow-hidden bg-gray-300 dark:bg-gray-900"
               onClick={() => setSelectedProject(project)}
             >
               <img

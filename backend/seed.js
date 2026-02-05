@@ -41,6 +41,7 @@ const projectSchema = new mongoose.Schema({
   image_urls: [{ type: String, required: true }],
   project_url: String,
   technologies: [String],
+  likes: { type: Number, default: 0 },
   order_index: { type: Number, default: 0 },
   created_at: { type: Date, default: Date.now }
 });
@@ -66,7 +67,9 @@ async function seed() {
     const skills = await Skill.insertMany(sampleSkills);
     console.log(`✓ ${skills.length} skills created`);
 
-    const projects = await Project.insertMany(sampleProjects);
+    // Remove _id from projects to let MongoDB generate ObjectIds
+    const projectsData = sampleProjects.map(({ _id, ...rest }) => rest);
+    const projects = await Project.insertMany(projectsData);
     console.log(`✓ ${projects.length} projects created`);
 
     console.log('\n✅ Database seeded successfully!');

@@ -4,16 +4,21 @@ import { Settings, Moon, Sun, Download, Globe, X } from 'lucide-react';
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onThemeChange?: (darkMode: boolean) => void;
 }
 
-export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
+export default function SettingsModal({ isOpen, onClose, onThemeChange }: SettingsModalProps) {
   const [darkMode, setDarkMode] = useState(true);
   const [accentColor, setAccentColor] = useState<'orange' | 'pink' | 'blue'>('orange');
 
   // Load settings from localStorage on mount
   useEffect(() => {
+    console.log('SettingsModal mounted, isOpen:', isOpen);
     const savedDarkMode = localStorage.getItem('darkMode');
     const savedAccentColor = localStorage.getItem('accentColor');
+    
+    console.log('Saved darkMode from localStorage:', savedDarkMode);
+    console.log('Document dark class:', document.documentElement.classList.contains('dark'));
     
     if (savedDarkMode !== null) setDarkMode(JSON.parse(savedDarkMode));
     if (savedAccentColor) {
@@ -21,19 +26,28 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       setAccentColor(color);
       applyAccentColor(color);
     }
-  }, []);
+  }, [isOpen]);
 
   // Save settings to localStorage
   const handleDarkModeToggle = () => {
     const newDarkMode = !darkMode;
+    console.log('Toggle clicked! Current:', darkMode, 'New:', newDarkMode);
     setDarkMode(newDarkMode);
     localStorage.setItem('darkMode', JSON.stringify(newDarkMode));
     
     // Apply theme to document
     if (newDarkMode) {
       document.documentElement.classList.add('dark');
+      console.log('Added dark class');
     } else {
       document.documentElement.classList.remove('dark');
+      console.log('Removed dark class');
+    }
+    
+    // Emit callback to parent
+    if (onThemeChange) {
+      console.log('Calling onThemeChange with:', newDarkMode);
+      onThemeChange(newDarkMode);
     }
   };
 
@@ -115,7 +129,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <button
                 onClick={handleDarkModeToggle}
                 className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
-                  darkMode ? 'accent-gradient-to-r' : 'bg-gray-400'
+                  darkMode ? 'bg-gradient-to-r from-orange-500 to-pink-500' : 'bg-gray-400'
                 }`}
               >
                 <span

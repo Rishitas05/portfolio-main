@@ -1,23 +1,49 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Instagram, Home, Search, Compass, Mail, Settings, Menu, X } from 'lucide-react';
 import ContactModal from './ContactModal';
 import SettingsModal from './SettingsModal';
 import ExploreModal from './ExploreModal';
 import SearchModal from './SearchModal';
 
-export default function Sidebar() {
+interface SidebarProps {
+  isLoggedIn: boolean;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
+  onModalClose?: () => void;
+  onThemeChange?: (darkMode: boolean) => void;
+}
+
+export default function Sidebar({ isLoggedIn, activeTab, onTabChange, onModalClose, onThemeChange }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isExploreOpen, setIsExploreOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [user, setUser] = useState<{ username: string; email: string } | null>(null);
+  const [previousTab, setPreviousTab] = useState<string>('Home');
+
+  useEffect(() => {
+    // Update user info whenever login state changes
+    if (isLoggedIn) {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        try {
+          setUser(JSON.parse(userStr));
+        } catch (error) {
+          console.error('Error parsing user:', error);
+        }
+      }
+    } else {
+      setUser(null);
+    }
+  }, [isLoggedIn]);
 
   const menuItems = [
-    { icon: Home, label: 'Home', href: '#' },
-    { icon: Search, label: 'Search', href: '#', onClick: () => setIsSearchOpen(true) },
-    { icon: Compass, label: 'Explore', href: '#', onClick: () => setIsExploreOpen(true) },
-    { icon: Mail, label: 'Contact', href: '#', onClick: () => setIsContactOpen(true) },
-    { icon: Settings, label: 'Settings', href: '#', onClick: () => setIsSettingsOpen(true) },
+    { icon: Home, label: 'Home', href: '#', onClick: () => { setPreviousTab('Home'); onTabChange?.('Home'); onModalClose?.(); } },
+    { icon: Search, label: 'Search', href: '#', onClick: () => { setPreviousTab(activeTab || 'Home'); onTabChange?.('Search'); setIsSearchOpen(true); } },
+    { icon: Compass, label: 'Explore', href: '#', onClick: () => { setPreviousTab(activeTab || 'Home'); onTabChange?.('Explore'); setIsExploreOpen(true); } },
+    { icon: Mail, label: 'Contact', href: '#', onClick: () => { setPreviousTab(activeTab || 'Home'); onTabChange?.('Contact'); setIsContactOpen(true); } },
+    { icon: Settings, label: 'Settings', href: '#', onClick: () => { console.log('Settings clicked'); setPreviousTab(activeTab || 'Home'); onTabChange?.('Settings'); setIsSettingsOpen(true); console.log('isSettingsOpen set to true'); } },
   ];
 
   return (
@@ -47,6 +73,7 @@ export default function Sidebar() {
         <nav className="flex-1 p-6 space-y-4">
           {menuItems.map((item) => {
             const Icon = item.icon;
+            const isActive = activeTab === item.label;
             return (
               <a
                 key={item.label}
@@ -57,20 +84,33 @@ export default function Sidebar() {
                     item.onClick();
                   }
                 }}
-                className="flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors group cursor-pointer"
+                className={`flex items-center gap-4 px-4 py-3 rounded-lg transition-all group cursor-pointer ${
+                  isActive
+                    ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-900 text-black dark:text-white'
+                }`}
               >
-                <Icon size={24} className="text-gray-600 dark:text-gray-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
-                <span className="text-lg text-black dark:text-white">{item.label}</span>
+                <Icon size={24} className={`transition-colors ${
+                  isActive
+                    ? 'text-white'
+                    : 'text-gray-600 dark:text-gray-400 group-hover:text-black dark:group-hover:text-white'
+                }`} />
+                <span className="text-lg">{item.label}</span>
               </a>
             );
           })}
         </nav>
 
-        <div className="p-6 border-t border-gray-200 dark:border-gray-800">
-          <button className="w-full py-3 accent-gradient-to-r rounded-lg font-semibold hover:opacity-90 transition-opacity">
-            Log Out
-          </button>
-        </div>
+        {/* User Info Section */}
+        {user && (
+          <div className="p-6 border-t border-gray-200 dark:border-gray-800">
+            <div className="px-4 py-3 bg-gray-100 dark:bg-gray-900 rounded-lg">
+              <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Logged in as</p>
+              <p className="text-sm font-semibold text-black dark:text-white truncate">@{user.username}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
+            </div>
+          </div>
+        )}
       </aside>
 
       {isOpen && (
@@ -80,10 +120,10 @@ export default function Sidebar() {
         />
       )}
 
-      <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
-      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
-      <ExploreModal isOpen={isExploreOpen} onClose={() => setIsExploreOpen(false)} />
-      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      <ContactModal isOpen={isContactOpen} onClose={() => { setIsContactOpen(false); onTabChange?.(previousTab); }} />
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => { setIsSettingsOpen(false); onTabChange?.(previousTab); }} onThemeChange={onThemeChange} />
+      <ExploreModal isOpen={isExploreOpen} onClose={() => { setIsExploreOpen(false); onTabChange?.(previousTab); }} activeTab={activeTab} onTabChange={onTabChange} />
+      <SearchModal isOpen={isSearchOpen} onClose={() => { setIsSearchOpen(false); onTabChange?.(previousTab); }} />
     </>
   );
 }

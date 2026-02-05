@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Zap, Trophy, Lightbulb, Cpu, X, Flame } from 'lucide-react';
+import { Sparkles, Zap, Trophy, Lightbulb, Cpu, X, Heart, MessageCircle, Send } from 'lucide-react';
 import InstagramProjectPost from './InstagramProjectPost';
+import Sidebar from './Sidebar';
 
 interface WorkItem {
   _id?: string;
@@ -12,11 +13,22 @@ interface WorkItem {
   technologies: string[];
   order_index: number;
   created_at?: string;
+  likes?: number;
+}
+
+interface Comment {
+  _id: string;
+  username: string;
+  text: string;
+  created_at: string;
+  userId: string;
 }
 
 interface ExploreModalProps {
   isOpen: boolean;
   onClose: () => void;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
 }
 
 interface CategoryData {
@@ -29,16 +41,126 @@ interface CategoryData {
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-export default function ExploreModal({ isOpen, onClose }: ExploreModalProps) {
+export default function ExploreModal({ isOpen, onClose, activeTab, onTabChange }: ExploreModalProps) {
   const [selectedWork, setSelectedWork] = useState<WorkItem | null>(null);
   const [categories, setCategories] = useState<{ [key: string]: CategoryData }>({});
   const [allItems, setAllItems] = useState<(WorkItem & { category: string; categoryLabel: string; icon: React.ReactNode; color: string })[]>([]);
+  const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
+  const [commentText, setCommentText] = useState<{ [key: string]: string }>({});
+  const [comments, setComments] = useState<{ [key: string]: Comment[] }>({});
+  const [user, setUser] = useState<{ id: string; username: string } | null>(null);
+  const [isPostingComment, setIsPostingComment] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
     if (isOpen) {
       fetchWorkData();
+      checkAuth();
     }
   }, [isOpen]);
+
+  const checkAuth = () => {
+    const token = localStorage.getItem('auth_token');
+    setIsLoggedIn(!!token);
+    
+    // Get user from localStorage
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        setUser(JSON.parse(userStr));
+      } catch (error) {
+        console.error('Error parsing user:', error);
+      }
+    }
+  };
+
+  const handleLike = (itemId: string | undefined, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!itemId) return;
+    
+    const newLiked = new Set(likedItems);
+    if (newLiked.has(itemId)) {
+      newLiked.delete(itemId);
+    } else {
+      newLiked.add(itemId);
+    }
+    setLikedItems(newLiked);
+  };
+
+  const toggleCommentSection = (itemId: string | undefined) => {
+    if (!itemId) return;
+    const newExpanded = new Set(expandedComments);
+    if (newExpanded.has(itemId)) {
+      newExpanded.delete(itemId);
+    } else {
+      newExpanded.add(itemId);
+      loadComments(itemId);
+    }
+    setExpandedComments(newExpanded);
+  };
+
+  const loadComments = async (itemId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/projects/${itemId}/comments`);
+      if (response.ok) {
+        const data = await response.json();
+        setComments(prev => ({
+          ...prev,
+          [itemId]: data
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading comments:', error);
+    }
+  };
+
+  const handlePostComment = async (itemId: string | undefined) => {
+    if (!itemId) return;
+    if (!commentText[itemId]?.trim()) return;
+
+    setIsPostingComment(prev => ({
+      ...prev,
+      [itemId]: true
+    }));
+
+    try {
+      console.log('Posting comment:', { itemId, text: commentText[itemId], user });
+      const response = await fetch(`${API_BASE_URL}/projects/${itemId}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: commentText[itemId],
+          userId: user?.id,
+          username: user?.username
+        })
+      });
+
+      if (response.ok) {
+        console.log('Comment posted successfully');
+        const newComment = await response.json();
+        setComments(prev => ({
+          ...prev,
+          [itemId]: [newComment, ...(prev[itemId] || [])]
+        }));
+        setCommentText(prev => ({
+          ...prev,
+          [itemId]: ''
+        }));
+      } else {
+        const errorText = await response.text();
+        console.error('Error posting comment:', response.status, errorText);
+      }
+    } catch (error) {
+      console.error('Error posting comment:', error);
+    } finally {
+      setIsPostingComment(prev => ({
+        ...prev,
+        [itemId]: false
+      }));
+    }
+  };
 
   const fetchWorkData = async () => {
     try {
@@ -94,127 +216,237 @@ export default function ExploreModal({ isOpen, onClose }: ExploreModalProps) {
 
   return (
     <div
-      className="fixed inset-0 bg-black z-50 overflow-hidden flex flex-col"
-      onClick={onClose}
+      className="fixed inset-0 bg-white dark:bg-black z-50 overflow-hidden flex flex-col lg:flex-row"
     >
-      {/* Header - Fixed */}
-      <div className="bg-black border-b border-gray-800 p-4 flex items-center justify-between sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <div className="inline-block p-2 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full">
-            <Sparkles size={20} />
-          </div>
-          <h1 className="text-xl font-bold">Explore</h1>
-        </div>
+      {/* Sidebar */}
+      <Sidebar isLoggedIn={isLoggedIn} activeTab={activeTab} onTabChange={onTabChange} onModalClose={onClose} />
+
+      {/* Main Content */}
+      <div
+        className="flex-1 flex flex-col overflow-hidden"
+      >
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="p-2 hover:bg-gray-900 rounded-lg transition-colors"
+          className="absolute top-4 right-4 z-50 p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
         >
           <X size={24} />
         </button>
-      </div>
 
-      {/* Feed Content - Scrollable */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto space-y-0">
+        {/* Feed Content - Scrollable */}
+      <div className="flex-1 overflow-y-auto bg-white dark:bg-gray-950">
+        <div className="mx-auto py-4 space-y-3 px-2 max-w-5xl">
+          {showLoginPrompt && (
+            <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+              <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-lg p-6 max-w-sm mx-4 text-center">
+                <h3 className="text-xl font-bold text-black dark:text-white mb-2">Sign In to Comment</h3>
+                <p className="text-gray-700 dark:text-gray-400 mb-6">You need to be signed in to comment on posts.</p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowLoginPrompt(false)}
+                    className="flex-1 px-4 py-2 bg-gray-300 dark:bg-gray-800 hover:bg-gray-400 dark:hover:bg-gray-700 text-black dark:text-white rounded transition-colors"
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowLoginPrompt(false);
+                      onClose();
+                    }}
+                    className="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded transition-colors font-semibold"
+                  >
+                    Sign In
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           {allItems.length > 0 ? (
-            allItems.map((item, index) => (
-              <div
-                key={item._id || `${item.category}-${index}`}
-                onClick={(e) => {
-                  if ((e.target as HTMLElement).closest('button')) return;
-                  setSelectedWork(item);
-                }}
-                className="border-b border-gray-800 hover:bg-gray-900/50 transition-colors cursor-pointer group"
-              >
-                {/* Category Header - Show first item or when category changes */}
-                {(index === 0 || allItems[index - 1]?.category !== item.category) && (
-                  <div className={`px-4 pt-4 pb-2 ${item.color} bg-opacity-5`}>
-                    <div className="flex items-center gap-2">
-                      <div className="text-gray-400">{item.icon}</div>
-                      <h2 className="text-sm font-bold text-gray-300 uppercase tracking-wider">{item.categoryLabel}</h2>
-                      <span className="text-xs text-gray-500 ml-auto">
-                        {allItems.filter(i => i.category === item.category).length} items
+            allItems.map((item, index) => {
+              const itemId = item._id || item.id || `item-${index}`;
+              return (
+                <div
+                  key={item._id || `${item.category}-${index}`}
+                  className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-lg overflow-hidden hover:border-gray-400 dark:hover:border-gray-700 transition-colors"
+                >
+                {/* Reddit-style Post Header */}
+                <div className="px-4 py-3 flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
+                  <div className={`p-2 rounded-full ${item.color} bg-opacity-20`}>
+                    {item.icon}
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-800 dark:text-gray-300">r/{item.categoryLabel}</div>
+                    <div className="text-gray-500 dark:text-gray-500">Posted by u/developer</div>
+                  </div>
+                  <span className="text-gray-400 dark:text-gray-600">•••</span>
+                </div>
+
+                {/* Post Title */}
+                <div 
+                  onClick={() => setSelectedWork(item)}
+                  className="px-4 cursor-pointer hover:text-orange-600 dark:hover:text-orange-400 transition-colors text-black dark:text-white"
+                >
+                  <h3 className="text-base font-bold mb-2 line-clamp-2">
+                    {item.title}
+                  </h3>
+                </div>
+
+                {/* Post Description */}
+                <div className="px-4 mb-3">
+                  <p className="text-sm text-gray-700 dark:text-gray-400 line-clamp-2">
+                    {item.description}
+                  </p>
+                </div>
+
+                {/* Post Image/Media */}
+                <div 
+                  onClick={() => setSelectedWork(item)}
+                  className="bg-gray-200 dark:bg-gray-800 aspect-video flex items-center justify-center cursor-pointer group overflow-hidden"
+                >
+                  <img
+                    src={item.image_urls[0]}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  />
+                </div>
+
+                {/* Technologies Tags */}
+                <div className="px-4 py-2 bg-gray-100 dark:bg-gray-800/50 flex flex-wrap gap-1">
+                  {item.technologies.slice(0, 4).map((tech, idx) => (
+                    <span
+                      key={idx}
+                      className="text-xs px-2 py-1 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-300 rounded-full hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                  {item.technologies.length > 4 && (
+                    <span className="text-xs px-2 py-1 text-gray-600 dark:text-gray-400">
+                      +{item.technologies.length - 4}
+                    </span>
+                  )}
+                </div>
+
+                {/* Reddit-style Actions */}
+                <div className="px-3 py-2 flex items-center justify-between text-gray-600 dark:text-gray-400 text-sm border-t border-gray-300 dark:border-gray-800">
+                  <div className="flex items-center gap-4">
+                    {/* Upvote/Like */}
+                    <button
+                      onClick={(e) => handleLike(itemId, e)}
+                      className="flex items-center gap-1.5 hover:text-orange-500 hover:bg-orange-500/10 px-2 py-1 rounded transition-all group"
+                    >
+                      <Heart
+                        size={16}
+                        className={`transition-all ${likedItems.has(itemId) ? 'fill-orange-500 text-orange-500' : ''}`}
+                      />
+                      <span className="text-xs group-hover:text-orange-500">
+                        {(item.likes || 0) + (likedItems.has(itemId) ? 1 : 0)}
                       </span>
+                    </button>
+
+                    {/* Comments */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!isLoggedIn) {
+                          setShowLoginPrompt(true);
+                        } else {
+                          toggleCommentSection(itemId);
+                        }
+                      }}
+                      className="flex items-center gap-1.5 hover:text-blue-500 hover:bg-blue-500/10 px-2 py-1 rounded transition-all group"
+                    >
+                      <MessageCircle size={16} />
+                      <span className="text-xs group-hover:text-blue-500">
+                        {expandedComments.has(itemId) ? 'Hide' : 'Comment'}
+                      </span>
+                    </button>
+
+                    {/* Share */}
+                    <button className="flex items-center gap-1.5 hover:text-green-500 hover:bg-green-500/10 px-2 py-1 rounded transition-all group">
+                      <span className="text-xs group-hover:text-green-500">Share</span>
+                    </button>
+                  </div>
+
+                  {/* GitHub Link */}
+                  <a
+                    href={item.project_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-xs px-2 py-1 bg-gradient-to-r from-orange-500 to-pink-500 rounded hover:opacity-90 transition-opacity font-semibold"
+                  >
+                    View →
+                  </a>
+                </div>
+
+                {/* Comments Section */}
+                {isLoggedIn && expandedComments.has(itemId) && (
+                  <div className="px-4 py-3 bg-gray-100 dark:bg-gray-800/30 border-t border-gray-300 dark:border-gray-800 space-y-3">
+                    {/* Comment Input */}
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          placeholder="Write a comment..."
+                          value={commentText[itemId] || ''}
+                          onChange={(e) => setCommentText(prev => ({
+                            ...prev,
+                            [itemId]: e.target.value
+                          }))}
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded text-sm text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                        />
+                      </div>
+                      <button
+                        onClick={() => handlePostComment(itemId)}
+                        disabled={isPostingComment[itemId] || !commentText[itemId]?.trim()}
+                        className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-700 text-white rounded text-sm font-semibold transition-colors flex items-center gap-1"
+                      >
+                        <Send size={14} />
+                        Post
+                      </button>
+                    </div>
+
+                    {/* Comments List */}
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {comments[itemId]?.length > 0 ? (
+                        comments[itemId].map((comment: Comment) => (
+                          <div key={comment._id} className="p-2 bg-gray-200 dark:bg-gray-900/50 rounded text-sm">
+                            <div className="flex gap-2">
+                              <div className="font-semibold text-blue-600 dark:text-blue-400 text-xs">{comment.username}</div>
+                              <div className="text-gray-600 dark:text-gray-500 text-xs">
+                                {new Date(comment.created_at).toLocaleDateString()}
+                              </div>
+                            </div>
+                            <p className="text-gray-700 dark:text-gray-300 text-xs mt-1">{comment.text}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-gray-600 dark:text-gray-500 text-xs text-center py-2">No comments yet</p>
+                      )}
                     </div>
                   </div>
                 )}
-
-                {/* Feed Item */}
-                <div className="p-4 flex gap-4">
-                  {/* Image */}
-                  <div className="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-gray-800">
-                    <img
-                      src={item.image_urls[0]}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start gap-2 mb-2">
-                      <div className={`inline-block px-2 py-1 rounded text-xs font-semibold bg-gradient-to-r ${item.color} bg-opacity-20 text-transparent bg-clip-text`}>
-                        {item.categoryLabel}
-                      </div>
-                      {item.image_urls.length > 1 && (
-                        <div className="flex items-center gap-1 text-xs text-gray-400">
-                          <Flame size={12} className="fill-orange-500 text-orange-500" />
-                          {item.image_urls.length} images
-                        </div>
-                      )}
-                    </div>
-
-                    <h3 className="text-lg font-bold text-white mb-1 line-clamp-2 group-hover:text-orange-400 transition-colors">
-                      {item.title}
-                    </h3>
-
-                    <p className="text-gray-400 text-sm mb-3 line-clamp-2">
-                      {item.description}
-                    </p>
-
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {item.technologies.slice(0, 3).map((tech, idx) => (
-                        <span
-                          key={idx}
-                          className="inline-block px-2 py-1 text-xs bg-gray-800 text-gray-300 rounded hover:bg-gray-700 transition-colors"
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                      {item.technologies.length > 3 && (
-                        <span className="inline-block px-2 py-1 text-xs bg-gray-800 text-gray-300 rounded">
-                          +{item.technologies.length - 3} more
-                        </span>
-                      )}
-                    </div>
-
-                    <a
-                      href={item.project_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="inline-flex px-3 py-1 text-xs bg-gradient-to-r from-orange-500 to-pink-500 rounded hover:opacity-90 transition-opacity font-semibold"
-                    >
-                      View on GitHub →
-                    </a>
-                  </div>
-                </div>
               </div>
-            ))
+            );
+            })
           ) : (
-            <div className="flex items-center justify-center h-96 text-gray-400">
+            <div className="flex items-center justify-center h-96 text-gray-600 dark:text-gray-400">
               <div className="text-center">
                 <Sparkles size={48} className="mx-auto mb-4 opacity-50" />
-                <p>No items found</p>
+                <p>No posts found</p>
               </div>
             </div>
           )}
 
           {/* End of feed */}
-          <div className="px-4 py-8 text-center text-gray-500 border-t border-gray-800">
-            <p className="text-sm">That's all for now! More coming soon...</p>
-          </div>
+          {allItems.length > 0 && (
+            <div className="py-4 text-center text-gray-600 dark:text-gray-500 text-sm">
+              <p>That's all folks! More coming soon...</p>
+            </div>
+          )}
         </div>
+      </div>
       </div>
     </div>
   );

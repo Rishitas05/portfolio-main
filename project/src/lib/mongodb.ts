@@ -33,6 +33,7 @@ export interface Project {
   image_urls: string[];
   project_url: string;
   technologies: string[];
+  likes: number,
   order_index: number;
   created_at: string;
 }

@@ -136,11 +136,11 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
       {/* Side Panel */}
       <div
-        className={`fixed left-0 top-0 h-screen w-full max-w-2xl bg-black z-50 overflow-hidden flex flex-col transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-700 ease-in-out`}
+        className={`fixed left-0 top-0 h-screen w-full max-w-2xl bg-white dark:bg-black z-50 overflow-hidden flex flex-col transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-700 ease-in-out`}
         aria-hidden={!isOpen}
       >
         {/* Header - Fixed */}
-        <div className="bg-black border-b border-gray-800 p-4 sticky top-0 z-10">
+        <div className="bg-white dark:bg-black border-b border-gray-300 dark:border-gray-800 p-4 sticky top-0 z-10">
           <div className="flex items-center gap-3">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
@@ -154,13 +154,13 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     handleSearch(searchQuery);
                   }
                 }}
-                className="w-full bg-gray-900 border border-gray-700 rounded-full py-2 pl-10 pr-8 text-sm focus:outline-none focus:border-orange-500 transition-colors"
+                className="w-full bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-full py-2 pl-10 pr-8 text-sm text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-orange-500 transition-colors"
                 autoFocus
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 dark:hover:text-white"
                 >
                   <X size={18} />
                 </button>
@@ -168,7 +168,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-900 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-200 dark:hover:bg-gray-900 rounded-lg transition-colors text-black dark:text-white"
             >
               <X size={24} />
             </button>
@@ -183,8 +183,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             <div>
               {searchResults.length > 0 ? (
                 <div className="space-y-0">
-                  <div className="p-4 sticky top-0 bg-black border-b border-gray-800">
-                    <p className="text-sm text-gray-400">
+                  <div className="p-4 sticky top-0 bg-white dark:bg-black border-b border-gray-300 dark:border-gray-800">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
                     </p>
                   </div>
@@ -195,7 +195,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         if ((e.target as HTMLElement).closest('button')) return;
                         setSelectedWork(item);
                       }}
-                      className="border-b border-gray-800 hover:bg-gray-900/50 transition-colors cursor-pointer group p-4"
+                      className="border-b border-gray-300 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900/50 transition-colors cursor-pointer group p-4"
                     >
                       <div className="flex gap-4">
                         {/* Image */}
@@ -215,11 +215,11 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                             </div>
                           </div>
 
-                          <h3 className="text-lg font-bold text-white mb-1 line-clamp-2 group-hover:text-orange-400 transition-colors">
+                          <h3 className="text-lg font-bold text-black dark:text-white mb-1 line-clamp-2 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
                             {item.title}
                           </h3>
 
-                          <p className="text-gray-400 text-sm mb-3 line-clamp-2">
+                          <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
                             {item.description}
                           </p>
 
@@ -231,8 +231,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                                   key={idx}
                                   className={`inline-block px-2 py-1 text-xs rounded transition-colors ${
                                     matchesSearch
-                                      ? 'bg-orange-500/30 text-orange-300 border border-orange-500/50'
-                                      : 'bg-gray-800 text-gray-300'
+                                      ? 'bg-orange-500/30 text-orange-600 dark:text-orange-300 border border-orange-500/50'
+                                      : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                                   }`}
                                 >
                                   {tech}
@@ -246,7 +246,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="inline-flex px-3 py-1 text-xs bg-gradient-to-r from-orange-500 to-pink-500 rounded hover:opacity-90 transition-opacity font-semibold"
+                            className="inline-flex px-3 py-1 text-xs bg-gradient-to-r from-orange-500 to-pink-500 rounded hover:opacity-90 transition-opacity font-semibold text-white"
                           >
                             View on GitHub →
                           </a>
@@ -256,7 +256,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center h-96 text-gray-400">
+                <div className="flex flex-col items-center justify-center h-96 text-gray-600 dark:text-gray-400">
                   <Sparkles size={48} className="mb-4 opacity-50" />
                   <p className="text-lg font-semibold">No results found</p>
                   <p className="text-sm mt-2">Try searching for different keywords</p>
@@ -269,13 +269,13 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
               {recentSearches.length > 0 && (
                 <>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-gray-400">
+                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                       <Clock size={18} />
                       <h2 className="text-sm font-semibold">Recent</h2>
                     </div>
                     <button
                       onClick={clearSearchHistory}
-                      className="text-xs text-orange-500 hover:text-orange-400 transition-colors"
+                      className="text-xs text-orange-600 dark:text-orange-500 hover:text-orange-700 dark:hover:text-orange-400 transition-colors"
                     >
                       Clear All
                     </button>
@@ -286,13 +286,13 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       <button
                         key={idx}
                         onClick={() => handleRecentClick(search)}
-                        className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-900 transition-colors text-left group"
+                        className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-900 transition-colors text-left group text-black dark:text-white"
                       >
                         <div className="flex items-center gap-3">
-                          <Clock size={16} className="text-gray-500 group-hover:text-gray-400" />
-                          <span className="text-gray-300 group-hover:text-white">{search}</span>
+                          <Clock size={16} className="text-gray-600 dark:text-gray-500 group-hover:text-gray-800 dark:group-hover:text-gray-400" />
+                          <span className="text-gray-700 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white">{search}</span>
                         </div>
-                        <X size={16} className="text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <X size={16} className="text-gray-600 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </button>
                     ))}
                   </div>
@@ -301,8 +301,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
               {/* Search Tips */}
               <div className="mt-8 p-4 bg-gradient-to-br from-orange-500 to-pink-500 bg-opacity-10 border border-orange-500/20 rounded-lg">
-                <h3 className="font-semibold text-white mb-2">Search Tips</h3>
-                <ul className="text-sm text-gray-400 space-y-1">
+                <h3 className="font-semibold text-black dark:text-white mb-2">Search Tips</h3>
+                <ul className="text-sm text-gray-700 dark:text-gray-400 space-y-1">
                   <li>• Search by project name</li>
                   <li>• Search by technology (React, Node.js, etc.)</li>
                   <li>• Search by category (Projects, Hackathons, etc.)</li>
